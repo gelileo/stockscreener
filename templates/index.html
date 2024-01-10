@@ -1,0 +1,130 @@
+<html>
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; margin: 20px; }
+        td { padding: 5px; }
+        .bullish { background: green; color: white; }
+        .bearish { background: red; color: white; }
+        .pattern-info { background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 20px; margin-bottom: 20px; }
+        .pattern-title { font-weight: bold; color: #007bff; }
+        .clickable-row { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pattern Finder</h1>
+        <form class="form-inline mb-4">
+            <div class="form-group">
+                <select name="pattern" class="form-control">
+                    <option value="">-- Select a Pattern --</option>
+                    {% for key in candlestick_patterns %}
+                    <option value="{{ key }}" {% if pattern == key %}selected="selected"{% endif %}>{{ candlestick_patterns[key] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary ml-2">Scan</button>
+        </form>
+
+        {% if pattern_details[pattern] %}
+        <div class="pattern-info">
+            <div class="pattern-title">Overview</div>
+            <p>
+                {{ pattern_details[pattern]["overview"] }}
+            </p>
+            <div class="pattern-title">Details</div>
+            <p>
+                {{ pattern_details[pattern]["details"] }}
+            </p>
+        </div>
+        {% endif %}
+
+        {% if stocks %}
+            {% if pattern %}
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Company</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    {% if stocks[stock][pattern] %}
+                    <tr>
+                        <td>
+                            {{ stock }}
+                        </td>
+                        <td>
+                            {{ stocks[stock]['company'] }}
+                        </td>
+                        <td class="{{ stocks[stock][pattern] }}">
+                            {{ stocks[stock][pattern]}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <!-- <img src="https://finviz.com/chart.ashx?t={{ stock }}&ty=c&ta=1&p=d&s=l" class="img-fluid" /> -->
+                            <a href="https://finviz.com/quote.ashx?t={{ stock }}&ty=c&ta=1&p=d&r=m1" target="_blank">
+                                <img src="https://finviz.com/chart.ashx?t={{ stock }}&ty=c&ta=1&p=d&s=l" class="img-fluid" />
+                            </a>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info">
+                Please select a pattern to see details.
+            </div>
+            {% for stock in stocks %}
+            <h3>{{ stock }} - {{ stocks[stock]['company'] }}</h3>
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>                        
+                        <th>Pattern</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody>                   
+                        {% for matched in stocks[stock] if matched != 'company' %}
+                        {% if stocks[stock][matched] %}
+                        <tr class="clickable-row" data-url="http://127.0.0.1:5000/?pattern={{ matched }}">
+                            <td>
+                                {{ matched }}
+                            </td>
+                            <td class="{{ stocks[stock][matched] }}">
+                                {{ stocks[stock][matched]}}
+                            </td>
+                        </tr>
+
+                        {% endif %}
+                        {% endfor %}
+                    
+                </tbody>
+            </table>    
+            {% endfor %}
+            {% endif %}
+    
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var rows = document.querySelectorAll('.clickable-row');
+            rows.forEach(function(row) {
+                row.addEventListener('click', function() {
+                    // window.location.href = this.dataset.url;
+                    window.open(this.dataset.url, '_blank');
+                });
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
