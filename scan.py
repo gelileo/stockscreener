@@ -10,15 +10,14 @@ def get_proj_path():
 
 def initialize_stocks():
     stocks = {}
-    stock_path = os.path.join(get_proj_path(), "datasets/spy.csv")
-    with open(stock_path, "r") as f:
-        for row in csv.reader(f):
-            stocks[row[0]] = {"company": row[1]}
 
-    stock_path = os.path.join(get_proj_path(), "datasets/watching.csv")
-    with open(stock_path, "r") as f:
-        for row in csv.reader(f):
-            stocks[row[0]] = {"company": row[1]}
+    ticker_dir = os.path.join(get_proj_path(), "datasets/tickers")
+    # List all CSV files in the directory
+    ticker_files = [f for f in os.listdir(ticker_dir) if f.endswith(".csv")]
+    for ticker_file in ticker_files:
+        with open(os.path.join(ticker_dir, ticker_file), "r") as f:
+            for row in csv.reader(f):
+                stocks[row[0]] = {"company": row[1]}
 
     return stocks
 
@@ -77,16 +76,3 @@ def match_pattern(pattern, stocks):
 
     print(stocks)
     return stocks
-
-
-sth = {
-    "MMM": {"company": "3M Company", "CDLMATCHINGLOW": "bearish"},
-    "MSFT": {
-        "company": "Microsoft Corp.",
-        "CDLENGULFING": "bearish",
-        "CDLHIKKAKE": "bullish",
-    },
-    "MAA": {"company": "Mid-America Apartments"},
-    "AMD": {"company": "Advanced Micro Devices Inc", "CDLENGULFING": "bullish"},
-    "AAP": {"company": "Advance Auto Parts", "CDLHIKKAKE": "bullish"},
-}

@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 import yfinance as yf
-from datetime import datetime, timedelta
-from utils import workingdays as wd
 from utils.patterns import candlestick_patterns as patterns
 from utils.patterns_and_desc import pattern_details as pdesc
 from scan import scan, scan_all, get_proj_path
+from quotes import get_quote
 import os
 
 app = Flask(__name__)
@@ -27,21 +26,26 @@ def index():
 # run daily to get last 10 days of data
 @app.route("/daily")
 def snapshot():
-    with open(os.path.join(get_proj_path(), "datasets/watching.csv"), "r") as f:
-        stocks = f.read().splitlines()
-        for stock in stocks:
-            symbol = stock.split(",")[0]
+    ticker_dir = os.path.join(get_proj_path(), "datasets/tickers")
 
-            df = yf.download(
-                symbol,
-                start=wd.n_business_days_earlier(10).strftime("%Y-%m-%d"),
-                end=datetime.today().strftime("%Y-%m-%d"),
-            )
+    # List all CSV files in the directory
+    ticker_files = [f for f in os.listdir(ticker_dir) if f.endswith(".csv")]
 
-            quote_path = os.path.join(get_proj_path(), "datasets/daily")
-            df.to_csv(f"{quote_path}/{symbol}.csv")
+    # Initialize an empty set for stock symbols
+    symbols = set()
 
-    return "Hello, World!"
+    for ticker_file in ticker_files:
+        with open(os.path.join(ticker_dir, ticker_file), "r") as f:
+            stocks = f.read().splitlines()
+            for stock in stocks:
+                symbol = stock.split(",")[0]
+                symbols.add(symbol)
+
+    for symbol in symbols:
+        quote_path = os.path.join(get_proj_path(), "datasets/daily")
+        get_quote(symbol, quote_path)
+
+    return f"updated quotes for {len(symbols)} stocks!"
 
 
 if __name__ == "__main__":
