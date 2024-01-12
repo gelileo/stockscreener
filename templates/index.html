@@ -10,12 +10,15 @@
         .pattern-title { font-weight: bold; color: #007bff; }
         .clickable-row { cursor: pointer; }
     </style>
+    <script type="text/javascript">
+        var tickerNames = JSON.parse('{{ ticker_names | safe }}');
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Pattern Finder</h1>
         <form class="form-inline mb-4">
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <select name="pattern" class="form-control">
                     <option value="">-- Select a Pattern --</option>
                     {% for key in candlestick_patterns %}
@@ -23,6 +26,21 @@
                     {% endfor %}
                 </select>
             </div>
+
+             <!-- New Ticker Group Selector -->
+            <div class="form-group ml-2 mb-2">
+                <select name="ticker_group" class="form-control">
+                    <option value="">-- Select a Ticker Group --</option>
+                    {% for group in ticker_groups %}
+                    <option value="{{ group }}">{{ group }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- New Text Field for Ticker Names -->
+            <div class="form-group ml-2 mb-2">
+                <input id="ticker_names" type="text" class="form-control" name="ticker_names" placeholder="Enter Ticker Names">
+            </div>
+
             <button type="submit" class="btn btn-primary ml-2">Scan</button>
         </form>
 
@@ -125,6 +143,44 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/typeahead.js@0.11.1/dist/typeahead.bundle.min.js"></script>
+    <script>
+        // Assuming you have a list of ticker names
+        // var tickerNames = ['AAPL', 'GOOG', 'MSFT', 'AMZN'];
+    
+        // Initialize Typeahead
+        $('#ticker_names').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+        },
+        {
+            name: 'tickerNames',
+            source: substringMatcher(tickerNames)
+        });
+    
+        // Helper function for matching ticker names
+        function substringMatcher(strs) {
+            return function findMatches(q, cb) {
+                var matches, substringRegex;
+    
+                // An array that will be populated with substring matches
+                matches = [];
+    
+                // Regex used to determine if a string Nacontains the substring `q`
+                substringRegex = new RegExp(q, 'i');
+    
+                // Iterate through the pool of strings and for any string that
+                // contains the substring `q`, add it to the `matches` array
+                $.each(strs, function(i, str) {
+                    if (substringRegex.test(str)) {
+                        matches.push(str);
+                    }
+                });
+    
+                cb(matches);
+            };
+        }
+    </script>
 </body>
 </html>

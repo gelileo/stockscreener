@@ -3,6 +3,11 @@ import pandas as pd
 import talib
 from utils.patterns import candlestick_patterns as patterns
 
+# groups
+ticker_groups = [("spy", "S&P 500"), ("watch", "Watching List")]
+code_to_group = {key: value for key, value in ticker_groups}
+group_To_code = {value: key for key, value in ticker_groups}
+
 
 def get_proj_path():
     return os.path.dirname(os.path.abspath(__file__))
@@ -24,23 +29,24 @@ def initialize_stocks():
 
 def scan_all():
     stocks = initialize_stocks()
-
+    tickers = list(stocks.keys())
     for pattern in patterns.keys():
         stocks = match_pattern(pattern, stocks)
 
     # remove stocks with no patterns
     filtered_stocks = {ticker: info for ticker, info in stocks.items() if len(info) > 1}
 
-    return filtered_stocks
+    return (filtered_stocks, tickers)
 
 
 def scan(pattern=None):
     stocks = initialize_stocks()
+    tickers = list(stocks.keys())
     if pattern:
         match_pattern(pattern, stocks)
-        return stocks
+        return (stocks, tickers)
     else:
-        return stocks
+        return (stocks, tickers)
 
 
 def match_pattern(pattern, stocks):

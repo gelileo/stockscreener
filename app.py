@@ -2,24 +2,33 @@ from flask import Flask, render_template, request, redirect, url_for
 import yfinance as yf
 from utils.patterns import candlestick_patterns as patterns
 from utils.patterns_and_desc import pattern_details as pdesc
-from scan import scan, scan_all, get_proj_path
+from scan import scan, scan_all, get_proj_path, ticker_groups as groups
 from quotes import get_quote
 import os
+import json
 
 app = Flask(__name__)
+
+
+@app.route("/status")
+def status():
+    return "Running"
 
 
 @app.route("/")
 def index():
     pattern = request.args.get("pattern", None)
 
-    stocks = scan(pattern) if pattern else scan_all()
+    (stocks, tickers) = scan(pattern) if pattern else scan_all()
+    ticker_names_json = json.dumps(tickers)
     return render_template(
         "index.html",
         candlestick_patterns=patterns,
         stocks=stocks,
         pattern_details=pdesc,
         pattern=pattern,
+        ticker_groups=[group[1] for group in groups],
+        ticker_names=ticker_names_json,
     )
 
 
