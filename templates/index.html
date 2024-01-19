@@ -32,7 +32,7 @@
                 <select name="ticker_group" class="form-control">
                     <option value="">-- Select a Ticker Group --</option>
                     {% for group in ticker_groups %}
-                    <option value="{{ group }}">{{ group }}</option>
+                    <option value="{{ group }}" {% if 'Watching' in group %}selected="selected"{% endif %}>{{ group }}</option>
                     {% endfor %}
                 </select>
             </div>

@@ -18,8 +18,11 @@ def status():
 @app.route("/")
 def index():
     pattern = request.args.get("pattern", None)
-
-    (stocks, tickers) = scan(pattern) if pattern else scan_all()
+    group = request.args.get("ticker_group", None)
+    ticketnames = request.args.get("ticker_names", None)
+    (stocks, tickers) = (
+        scan(pattern, group, ticketnames) if pattern else scan_all(group, ticketnames)
+    )
     ticker_names_json = json.dumps(tickers)
     return render_template(
         "index.html",
